@@ -41,23 +41,27 @@ class EmailVerif:
             raise InvalidCodeLength("invalid code length, must be at least 1")
 
         for dest_email in emails:
-            Verification_Code = randint(1**self.__code_length,(10**self.__code_length)-1)
+            Verification_Code = randint(10**(self.__code_length-1),(10**self.__code_length)-1)
             self.__verif_codes[dest_email] = {"Verification_Code":Verification_Code,"Time_Sent":time(),"Time_Limit":timeLimit}
             message = f'''
 your verification code is: {Verification_Code}
 '''
             self.__SMTP.sendmail(self.__ACCOUNT_ID, dest_email, message)
-            self.__SMTP.quit()
+    
+    def close(self):
+        """call this function when ever your done with sending emails,\n
+        you will need to log in again though"""
+        self.__SMTP.quit()
     
     def enter_verif(self,email:str, Verification_code:int):
         try:
             verif_data = self.__verif_codes[email]
-        except:
+        except KeyError:
             raise NoPendingVerificationException(f"No verification code waiting for that email,{email}")
         
         if (float(verif_data["Time_Sent"])+float(verif_data["Time_Limit"])) < time():
             del self.__verif_codes[email]
-            raise LateException(f"You are too late to enter a Verification Code as at least {verif_data["Time_Limit"]} seconds has passed")
+            raise LateException(f"You are too late to enter a Verification Code as at least {verif_data['Time_Limit']} seconds has passed")
 
         return int(verif_data["Verification_Code"]) == int(Verification_code)
 
@@ -76,7 +80,7 @@ if __name__ == "__main__":
     li = [f"{ACCOUNT_ID}@gmail.com"]
 
     Email = EmailVerif(ACCOUNT_ID,ACCOUNT_PASSWORD)
-    Email.send_verification(li)
+    Email.send_verification(li,5)
 
     print("=== what the client should only see ===")
     print(f"whats the {Email.get_code_length()}-digit verification code")
@@ -93,3 +97,4 @@ if __name__ == "__main__":
     else:
         print("Invalid verification Code given")
     
+    Email.close()
