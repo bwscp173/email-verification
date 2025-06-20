@@ -1,3 +1,14 @@
+#before running this:
+#create a file called 'email_login_info.json'
+#and paste this into the file and fill in your information
+#
+#{
+#     "ACCOUNT_ID":"YOUR EMAIL WITH ONLY EVERYTHING BEFORE THE @",
+#     "ACCOUNT_PASSWORD":"YOUR PASSWORD"
+# }
+
+
+
 import smtplib
 from json import loads
 from random import randint
@@ -67,6 +78,10 @@ your verification code is: {Verification_Code}
 
 
 if __name__ == "__main__":
+    #this test will just email your self with a 6 digit code
+    #it will then ask for the code if you enter it within 120 seconds correctly.
+    #the code will be accepted
+    
     with open("email_login_info.json","r") as f:
         data = loads(f.read())
         ACCOUNT_ID:str = data["ACCOUNT_ID"]
